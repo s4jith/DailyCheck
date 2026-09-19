@@ -1,0 +1,251 @@
+@import 'tailwindcss';
+
+@plugin 'tailwindcss-animate';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-body: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
+  --font-headline: var(--font-grotesk), var(--font-instrument), ui-sans-serif, sans-serif;
+  --font-code: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+
+  --color-sidebar: hsl(var(--sidebar-background));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-sm: calc(var(--radius) - 6px);
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-rise: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@layer base {
+  /*
+    One dark theme only. `:root` and `.dark` carry identical values so the
+    `dark:` variant still resolves for components that ship dark-only styles.
+  */
+  :root,
+  .dark {
+    color-scheme: dark;
+
+    --background: 240 9% 4%;
+    --foreground: 240 10% 98%;
+
+    --card: 240 8% 8%;
+    --card-foreground: 240 10% 98%;
+
+    --popover: 240 9% 7%;
+    --popover-foreground: 240 10% 98%;
+
+    /* Brand red — actions, spending, focus. */
+    --primary: 358 75% 59%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 6% 14%;
+    --secondary-foreground: 240 10% 96%;
+
+    --muted: 240 6% 12%;
+    --muted-foreground: 240 5% 64%;
+
+    --accent: 240 6% 16%;
+    --accent-foreground: 240 10% 98%;
+
+    --destructive: 358 75% 59%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Money moving the right way. */
+    --success: 151 65% 54%;
+    --success-foreground: 151 80% 6%;
+
+    /* Over budget / needs attention — never colour alone, always with a label. */
+    --warning: 37 91% 55%;
+    --warning-foreground: 37 90% 8%;
+
+    --border: 240 6% 15%;
+    --input: 240 6% 17%;
+    --ring: 358 75% 59%;
+
+    --radius: 0.875rem;
+
+    /* Validated on the card surface (#121215) for the dark lightness band. */
+    --chart-1: 358 75% 59%; /* #E5484D — spending */
+    --chart-2: 212 76% 56%; /* #3987E5 */
+    --chart-3: 160 72% 36%; /* #199E70 */
+    --chart-4: 39 100% 39%; /* #C98500 */
+    --chart-5: 246 68% 72%; /* #9085E9 */
+
+    --sidebar-background: 240 10% 5%;
+    --sidebar-foreground: 240 6% 72%;
+    --sidebar-primary: 358 75% 59%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 7% 12%;
+    --sidebar-accent-foreground: 240 10% 98%;
+    --sidebar-border: 240 6% 13%;
+    --sidebar-ring: 358 75% 59%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'ss01';
+  }
+
+  /*
+    A single soft brand wash behind the page — nothing that competes with data.
+    It lives on its own fixed layer rather than on `background-attachment: fixed`,
+    which forces a full repaint of the backdrop on every scroll frame.
+  */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+      radial-gradient(60rem 28rem at 12% -10%, hsl(var(--primary) / 0.1), transparent 65%),
+      radial-gradient(48rem 24rem at 100% 0%, hsl(212 76% 56% / 0.055), transparent 60%);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-headline);
+    letter-spacing: -0.02em;
+  }
+
+  /* Currency and any figure that has to line up in a column. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.28);
+    color: hsl(var(--foreground));
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(240 6% 20%);
+    border: 2px solid transparent;
+    background-clip: content-box;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(240 6% 28%);
+    background-clip: content-box;
+  }
+}
+
+@layer components {
+  /* The hairline highlight along a raised surface's top edge. */
+  .surface-edge {
+    box-shadow:
+      inset 0 1px 0 0 hsl(0 0% 100% / 0.04),
+      0 1px 2px 0 hsl(0 0% 0% / 0.4);
+  }
+
+  /* Tinted square that holds an icon next to a label. */
+  .icon-tile {
+    @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border;
+    border-color: hsl(var(--primary) / 0.22);
+    background: hsl(var(--primary) / 0.1);
+    color: hsl(var(--primary));
+  }
+}
