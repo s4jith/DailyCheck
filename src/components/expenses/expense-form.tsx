@@ -1,6 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -21,8 +22,20 @@ import { format } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import type { Expense, NewExpense } from '@/lib/types';
 import { useCategories } from '@/hooks/use-categories';
+import { useAccounts } from '@/hooks/use-accounts';
+import { formatInr } from '@/lib/utils';
 
-const expenseFormSchema = z.object({
+const LAST_ACCOUNT_KEY = 'dailycheck:last-account';
+
+function readLastAccount() {
+  try {
+    return localStorage.getItem(LAST_ACCOUNT_KEY) ?? '';
+  } catch {
+    return '';
+  }
+}
+
+const baseExpenseFormSchema = z.object({
   description: z.string().trim().min(2, 'Description must be at least 2 characters.').max(200),
   amount: z.coerce.number<number>().positive('Amount must be a positive number.'),
   category: z.string().min(1, 'Please select a category.'),
@@ -30,9 +43,11 @@ const expenseFormSchema = z.object({
   time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, {
     message: 'Invalid time format. Use HH:mm',
   }),
+  /** Empty only when editing an expense logged before accounts existed. */
+  accountId: z.string(),
 });
 
-type ExpenseFormValues = z.infer<typeof expenseFormSchema>;
+type ExpenseFormValues = z.infer<typeof baseExpenseFormSchema>;
 
 interface ExpenseFormProps {
   initialValues?: Expense;
@@ -42,6 +57,18 @@ interface ExpenseFormProps {
 
 export function ExpenseForm({ initialValues, onSubmit }: ExpenseFormProps) {
   const { allCategories } = useCategories();
+  const { accounts } = useAccounts();
+  // New expenses must name an account; older unlinked ones may stay unlinked.
+  const requireAccount = !initialValues || Boolean(initialValues.accountId);
+
+  const expenseFormSchema = React.useMemo(
+    () =>
+      baseExpenseFormSchema.refine((value) => !requireAccount || value.accountId !== '', {
+        message: 'Choose the account this was paid from.',
+        path: ['accountId'],
+      }),
+    [requireAccount]
+  );
 
   const form = useForm<ExpenseFormValues>({
     resolver: zodResolver(expenseFormSchema),
@@ -52,6 +79,7 @@ export function ExpenseForm({ initialValues, onSubmit }: ExpenseFormProps) {
           category: initialValues.category,
           date: new Date(initialValues.date),
           time: format(new Date(initialValues.date), 'HH:mm'),
+          accountId: initialValues.accountId ?? '',
         }
       : undefined,
     defaultValues: {
@@ -59,8 +87,18 @@ export function ExpenseForm({ initialValues, onSubmit }: ExpenseFormProps) {
       amount: 0,
       date: new Date(),
       time: format(new Date(), 'HH:mm'),
+      accountId: '',
     },
   });
+
+  // Pre-select the account used last time once the accounts have loaded.
+  React.useEffect(() => {
+    if (initialValues || accounts.length === 0 || form.getValues('accountId')) return;
+    const last = readLastAccount();
+    const fallback = accounts.length === 1 ? accounts[0].id : '';
+    const pick = accounts.some((account) => account.id === last) ? last : fallback;
+    if (pick) form.setValue('accountId', pick);
+  }, [accounts, initialValues, form]);
 
   const handleSubmit = async (data: ExpenseFormValues) => {
     const [hours, minutes] = data.time.split(':').map(Number);
@@ -73,9 +111,17 @@ export function ExpenseForm({ initialValues, onSubmit }: ExpenseFormProps) {
       amount: data.amount,
       category: data.category,
       date,
+      accountId: data.accountId || null,
     });
     if (saved) {
-      form.reset();
+      if (data.accountId) {
+        try {
+          localStorage.setItem(LAST_ACCOUNT_KEY, data.accountId);
+        } catch {
+          // storage unavailable; the picker just won't remember
+        }
+      }
+      form.reset({ ...form.formState.defaultValues, accountId: data.accountId });
     }
   };
 
@@ -132,12 +178,40 @@ export function ExpenseForm({ initialValues, onSubmit }: ExpenseFormProps) {
             </FormItem>
           )}
         />
+        <FormField
+          control={form.control}
+          name="accountId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Paid From</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={
+                        accounts.length === 0 ? 'Add an account on the Accounts page' : 'Select an account'
+                      }
+                    />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {accounts.map((account) => (
+                    <SelectItem key={account.id} value={account.id}>
+                      {account.name} · {formatInr(account.balance)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <div className="flex gap-4">
           <FormField
             control={form.control}
             name="date"
             render={({ field }) => (
-              <FormItem className="flex flex-1 flex-col">
+              <FormItem className="flex min-w-0 flex-1 flex-col">
                 <FormLabel>Date</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -145,7 +219,7 @@ export function ExpenseForm({ initialValues, onSubmit }: ExpenseFormProps) {
                       <Button
                         variant={'outline'}
                         className={cn(
-                          'w-full pl-3 text-left font-normal',
+                          'w-full overflow-hidden pl-3 text-left font-normal',
                           !field.value && 'text-muted-foreground'
                         )}
                       >

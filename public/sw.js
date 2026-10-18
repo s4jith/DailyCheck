@@ -1,5 +1,5 @@
 /**
- * FinanceFlow service worker.
+ * DailyCheck service worker.
  *
  * Strategy:
  *  - Hashed build assets and icons: cache-first (immutable).
@@ -7,8 +7,8 @@
  *  - API and auth requests are never intercepted — financial data must
  *    always come from the server.
  */
-const VERSION = 'v1';
-const STATIC_CACHE = `financeflow-static-${VERSION}`;
+const VERSION = 'v2';
+const STATIC_CACHE = `dailycheck-static-${VERSION}`;
 const OFFLINE_URL = '/offline.html';
 
 const PRECACHE = [

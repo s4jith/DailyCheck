@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 import { api } from '@/lib/api';
 import type { Profile } from '@/lib/types';
 
-/** Loads the signed-in user's profile (name, avatar, monthly income). */
+/** Loads the signed-in user's profile (name, email, avatar). */
 export function useProfile() {
   const { status } = useSession();
   const [profile, setProfile] = React.useState<Profile | null>(null);

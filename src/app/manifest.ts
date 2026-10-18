@@ -2,14 +2,14 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'FinanceFlow',
-    short_name: 'FinanceFlow',
-    description: 'A comprehensive personal finance app for budgeting and expense tracking.',
+    name: 'DailyCheck',
+    short_name: 'DailyCheck',
+    description: 'Track your bank balances, expenses, budgets and savings in one place.',
     id: '/',
     start_url: '/',
     display: 'standalone',
-    background_color: '#f5f5f5',
-    theme_color: '#51c878',
+    background_color: '#0A0A0C',
+    theme_color: '#0A0A0C',
     icons: [
       { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
       { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },

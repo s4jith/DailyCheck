@@ -8,7 +8,7 @@ A personal finance app built with Next.js. Log your expenses, keep an eye on bud
 
 - **Framework**: Next.js 16 (App Router) + React 19
 - **Styling**: Tailwind CSS v4, shadcn/ui (Radix primitives), Space Grotesk + Instrument Sans
-- **Auth**: Auth.js (NextAuth v5) with Google sign-in
+- **Auth**: Auth.js (NextAuth v5) with email + password login (bcrypt-hashed, 7-day JWT session)
 - **Database**: MongoDB via Prisma ORM v6 (the latest Prisma line with MongoDB support — Prisma 7 is SQL-only for now)
 - **Visualization**: Recharts
 - **Tooling**: TypeScript, ESLint 9, Vitest
@@ -17,7 +17,7 @@ A personal finance app built with Next.js. Log your expenses, keep an eye on bud
 
 ## ✨ Features
 
-- 🔐 Google sign-in; every record is owned by and scoped to the signed-in user, enforced server-side
+- 🔐 Email/password login with a 7-day JWT; every record is owned by and scoped to the signed-in user, enforced server-side
 - 🏠 Dashboard with total expenses, total amount and net savings for the month, a daily spending trend, budget progress and recent transactions
 - 💵 Set your total amount directly, or add to / subtract from it
 - 📈 Add, edit, view, filter, sort, and delete expenses (with confirmation and per-expense version history)
@@ -36,7 +36,6 @@ A personal finance app built with Next.js. Log your expenses, keep an eye on bud
 
 - Node.js 20.9+ (Node 22 recommended)
 - A MongoDB database **running as a replica set** — [MongoDB Atlas](https://www.mongodb.com/atlas) free tier works out of the box; for a local instance start `mongod` with `--replSet rs0` and initialize it once with `rs.initiate()`
-- Google OAuth 2.0 credentials ([Google Cloud Console](https://console.cloud.google.com/apis/credentials))
 
 ### Installation
 
@@ -51,10 +50,7 @@ npm install
 1. Copy `.env.example` to `.env`.
 2. Set `DATABASE_URL` to your MongoDB connection string.
 3. Generate an auth secret: `npx auth secret` (or set `AUTH_SECRET` manually).
-4. Create a Google OAuth client (type: Web application) with the redirect URI
-   `http://localhost:9002/api/auth/callback/google`, then set
-   `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET`.
-5. Push the Prisma schema to your database (creates collections and indexes):
+4. Push the Prisma schema to your database (creates collections and indexes):
 
 ```bash
 npm run db:push
@@ -88,8 +84,10 @@ npm test           # Vitest unit tests
 - Input is validated with zod schemas shared in `src/lib/validations.ts`.
 - Budgets return `spent` computed from the **current month's** expenses.
 - Deleting a category is refused while expenses or budgets still reference it.
-- The dashboard's "total amount" is stored in the profile's `monthlyIncome`
-  field, so no schema change was needed when income was renamed in the UI.
+- The dashboard's "total amount" is the sum of your bank account balances
+  (`BankAccount`). Every balance change — manual add/subtract, transfer, or an
+  expense paid from the account — is written together with an
+  `AccountTransaction` history row inside one database transaction.
 - The theme is a single dark palette defined once as CSS variables in
   `src/app/globals.css`; components use the tokens (`bg-card`, `text-primary`,
   `text-success`, …) rather than hard-coded colours, so a re-skin is a

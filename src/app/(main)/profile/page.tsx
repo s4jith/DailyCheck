@@ -140,7 +140,7 @@ export default function ProfilePage() {
 
   return (
     <div className="animate-rise">
-      <PageHeader title="Your Profile" description="How you show up in FinanceFlow." />
+      <PageHeader title="Your Profile" description="How you show up in DailyCheck." />
       <div className="grid gap-4 sm:gap-5 md:grid-cols-3">
         <div className="md:col-span-1">
           <Card>

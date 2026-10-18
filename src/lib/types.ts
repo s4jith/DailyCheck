@@ -28,6 +28,8 @@ export type Expense = {
   amount: number;
   category: Category;
   date: Date;
+  /** Account the expense was paid from; null for expenses logged before accounts existed. */
+  accountId?: string | null;
 };
 
 /** Payload for creating an expense. */
@@ -78,5 +80,32 @@ export type Profile = {
   name: string | null;
   email: string | null;
   image: string | null;
-  monthlyIncome: number;
+};
+
+/** A bank account as returned by the API. */
+export type BankAccount = {
+  id: string;
+  name: string;
+  balance: number;
+  createdAt: string;
+};
+
+export type AccountTxnType =
+  | 'opening'
+  | 'credit'
+  | 'debit'
+  | 'transfer_in'
+  | 'transfer_out'
+  | 'expense';
+
+/** One entry in an account's history (dates serialized as ISO strings). */
+export type AccountTransaction = {
+  id: string;
+  accountId: string;
+  type: AccountTxnType;
+  amount: number;
+  note: string | null;
+  date: string;
+  expenseId: string | null;
+  transferId: string | null;
 };

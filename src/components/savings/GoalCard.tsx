@@ -50,7 +50,7 @@ export function GoalCard({ goal, onEdit, onContribute, onDelete }: GoalCardProps
   };
 
   return (
-    <Card className="flex flex-col">
+    <Card className="flex min-w-0 flex-col">
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between gap-2">
           <div className="flex min-w-0 items-center gap-3">
@@ -152,7 +152,7 @@ export function GoalCard({ goal, onEdit, onContribute, onDelete }: GoalCardProps
         )}
       </CardContent>
 
-      <CardFooter className="gap-2">
+      <CardFooter className="grid grid-cols-2 gap-2">
         <MoveMoneyDialog goal={goal} mode="add" onSubmit={onContribute} />
         <MoveMoneyDialog goal={goal} mode="withdraw" onSubmit={onContribute} />
       </CardFooter>

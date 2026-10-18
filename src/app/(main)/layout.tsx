@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import {
   AreaChart,
+  Landmark,
   LayoutDashboard,
   LoaderCircle,
   LogIn,
@@ -29,6 +30,7 @@ import {
   SidebarFooter,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -45,12 +47,16 @@ import { cn } from '@/lib/utils';
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/accounts', label: 'Accounts', icon: Landmark },
   { href: '/expenses', label: 'Expenses', icon: ReceiptText },
   { href: '/budgets', label: 'Budgets', icon: Target },
   { href: '/savings', label: 'Savings', icon: PiggyBank },
   { href: '/reports', label: 'Reports', icon: AreaChart },
   { href: '/categories', label: 'Categories', icon: Shapes },
 ];
+
+// The phone bar fits six items; Categories stays reachable from the profile menu.
+const mobileNavItems = navItems.filter((item) => item.href !== '/categories');
 
 /** The wordmark, used in the sidebar, the mobile header and the sign-in screen. */
 function Brand({ className, size = 'sm' }: { className?: string; size?: 'sm' | 'lg' }) {
@@ -70,7 +76,7 @@ function Brand({ className, size = 'sm' }: { className?: string; size?: 'sm' | '
           size === 'lg' ? 'text-2xl' : 'text-lg'
         )}
       >
-        Finance<span className="text-primary">Flow</span>
+        Daily<span className="text-primary">Check</span>
       </span>
     </div>
   );
@@ -84,12 +90,7 @@ function UserNav() {
   }
 
   if (!session?.user) {
-    return (
-      <Button onClick={() => signIn('google')}>
-        <LogIn className="mr-2 h-4 w-4" />
-        Login with Google
-      </Button>
-    );
+    return <AuthForm />;
   }
 
   const user = session.user;
@@ -126,6 +127,12 @@ function UserNav() {
             Profile
           </Link>
         </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/categories">
+            <Shapes className="mr-2 h-4 w-4" />
+            Categories
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => signOut()}>
           <LogOut className="mr-2 h-4 w-4" />
@@ -133,6 +140,90 @@ function UserNav() {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}
+
+function AuthForm() {
+  const [mode, setMode] = React.useState<'login' | 'register'>('login');
+  const [name, setName] = React.useState('');
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [error, setError] = React.useState<string | null>(null);
+  const [busy, setBusy] = React.useState(false);
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setBusy(true);
+    try {
+      if (mode === 'register') {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password }),
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => null);
+          setError(data?.error ?? 'Could not create account.');
+          return;
+        }
+      }
+      const result = await signIn('credentials', { email, password, redirect: false });
+      if (result?.error) {
+        setError('Invalid email or password. After 5 wrong tries, login locks for 15 minutes.');
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form onSubmit={onSubmit} className="space-y-3 text-left">
+      {mode === 'register' && (
+        <Input
+          placeholder="Name"
+          autoComplete="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+      )}
+      <Input
+        type="email"
+        placeholder="Email"
+        autoComplete="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+      />
+      <Input
+        type="password"
+        placeholder="Password"
+        autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+      />
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      <Button type="submit" className="w-full" disabled={busy}>
+        {busy ? (
+          <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+        ) : (
+          <LogIn className="mr-2 h-4 w-4" />
+        )}
+        {mode === 'login' ? 'Log in' : 'Create account'}
+      </Button>
+      <button
+        type="button"
+        className="w-full text-center text-xs text-muted-foreground hover:text-foreground"
+        onClick={() => {
+          setError(null);
+          setMode(mode === 'login' ? 'register' : 'login');
+        }}
+      >
+        {mode === 'login' ? "Don't have an account? Sign up" : 'Already have an account? Log in'}
+      </button>
+    </form>
   );
 }
 
@@ -202,7 +293,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           </div>
         </SidebarFooter>
       </Sidebar>
-      <SidebarInset>
+      {/* min-w-0 lets the content shrink to the phone's width instead of growing to fit charts. */}
+      <SidebarInset className="min-w-0">
         <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-4 border-b border-white/6 bg-background/80 px-4 backdrop-blur-md sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 sm:py-4 sm:backdrop-blur-none">
           <div className="md:hidden">
             <Brand />
@@ -215,7 +307,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           </div>
         </header>
         <main className="p-4 pb-24 sm:px-6 sm:pb-10 sm:pt-0 md:pb-10">{children}</main>
-        {isMobile && <BottomNavbar navItems={navItems} />}
+        {isMobile && <BottomNavbar navItems={mobileNavItems} />}
       </SidebarInset>
     </SidebarProvider>
   );

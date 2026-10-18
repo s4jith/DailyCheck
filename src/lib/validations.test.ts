@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
+  accountAdjustSchema,
+  accountSchema,
   budgetSchema,
   categorySchema,
   expenseSchema,
   profileSchema,
   savingsGoalSchema,
   savingsGoalUpdateSchema,
+  transferSchema,
 } from './validations';
 
 describe('expenseSchema', () => {
@@ -97,11 +100,9 @@ describe('profileSchema', () => {
 
   it('accepts partial updates', () => {
     expect(profileSchema.safeParse({ name: 'Alex' }).success).toBe(true);
-    expect(profileSchema.safeParse({ monthlyIncome: 0 }).success).toBe(true);
   });
 
-  it('rejects negative income and non-image data URLs', () => {
-    expect(profileSchema.safeParse({ monthlyIncome: -1 }).success).toBe(false);
+  it('rejects non-image data URLs', () => {
     expect(profileSchema.safeParse({ image: 'data:text/html;base64,PGI+' }).success).toBe(false);
     expect(profileSchema.safeParse({ image: 'https://example.com/a.png' }).success).toBe(false);
   });
@@ -110,5 +111,58 @@ describe('profileSchema', () => {
     expect(
       profileSchema.safeParse({ image: 'data:image/png;base64,iVBORw0KGgo=' }).success
     ).toBe(true);
+  });
+});
+
+const ID_A = '0123456789abcdef01234567';
+const ID_B = '89abcdef0123456789abcdef';
+
+describe('accountSchema', () => {
+  it('defaults the opening balance to zero', () => {
+    expect(accountSchema.parse({ name: 'HDFC Savings' }).openingBalance).toBe(0);
+  });
+
+  it('rejects short names and negative opening balances', () => {
+    expect(accountSchema.safeParse({ name: 'H' }).success).toBe(false);
+    expect(accountSchema.safeParse({ name: 'HDFC', openingBalance: -1 }).success).toBe(false);
+  });
+});
+
+describe('accountAdjustSchema', () => {
+  it('accepts credits and debits with an optional note', () => {
+    expect(accountAdjustSchema.safeParse({ type: 'credit', amount: 500 }).success).toBe(true);
+    expect(
+      accountAdjustSchema.parse({ type: 'debit', amount: '20', note: '  ATM  ' })
+    ).toMatchObject({ amount: 20, note: 'ATM' });
+  });
+
+  it('drops blank notes and rejects zero amounts or unknown types', () => {
+    expect(accountAdjustSchema.parse({ type: 'credit', amount: 1, note: '  ' }).note).toBeUndefined();
+    expect(accountAdjustSchema.safeParse({ type: 'credit', amount: 0 }).success).toBe(false);
+    expect(accountAdjustSchema.safeParse({ type: 'refund', amount: 5 }).success).toBe(false);
+  });
+});
+
+describe('transferSchema', () => {
+  it('accepts a transfer between two accounts', () => {
+    expect(transferSchema.safeParse({ fromId: ID_A, toId: ID_B, amount: 100 }).success).toBe(true);
+  });
+
+  it('rejects a transfer to the same account', () => {
+    expect(transferSchema.safeParse({ fromId: ID_A, toId: ID_A, amount: 100 }).success).toBe(false);
+  });
+});
+
+describe('expenseSchema accountId', () => {
+  const base = { description: 'Lunch', amount: 10, category: 'Food', date: '2026-01-01' };
+
+  it('accepts a valid id, null, or nothing', () => {
+    expect(expenseSchema.safeParse({ ...base, accountId: ID_A }).success).toBe(true);
+    expect(expenseSchema.safeParse({ ...base, accountId: null }).success).toBe(true);
+    expect(expenseSchema.safeParse(base).success).toBe(true);
+  });
+
+  it('rejects a malformed id', () => {
+    expect(expenseSchema.safeParse({ ...base, accountId: 'nope' }).success).toBe(false);
   });
 });

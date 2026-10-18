@@ -37,7 +37,7 @@ export function BottomNavbar({ navItems }: BottomNavbarProps) {
               )}
             >
               <item.icon className="h-5 w-5" />
-              <span>{item.label}</span>
+              <span className="w-full truncate text-center text-[10px] min-[360px]:text-[11px]">{item.label}</span>
             </Link>
           );
         })}

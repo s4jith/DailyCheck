@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { accountErrorResponse, chargeExpense } from '@/lib/accounts';
 import { expenseSchema, firstIssueMessage } from '@/lib/validations';
 
 export async function GET(request: NextRequest) {
@@ -52,9 +53,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: firstIssueMessage(parsed.error) }, { status: 400 });
   }
 
-  const expense = await prisma.expense.create({
-    data: { ...parsed.data, userId: session.user.id },
-  });
+  const userId = session.user.id;
 
-  return NextResponse.json(expense, { status: 201 });
+  try {
+    // Creating the expense and charging its account succeed or fail together.
+    const expense = await prisma.$transaction(async (tx) => {
+      const created = await tx.expense.create({
+        data: { ...parsed.data, accountId: parsed.data.accountId ?? null, userId },
+      });
+      await chargeExpense(tx, created);
+      return created;
+    });
+    return NextResponse.json(expense, { status: 201 });
+  } catch (error) {
+    return accountErrorResponse(error);
+  }
 }

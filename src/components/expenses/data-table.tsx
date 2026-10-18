@@ -182,7 +182,7 @@ export function ExpensesDataTable() {
               <span className="sm:hidden">Add</span>
             </Button>
           </DialogTrigger>
-          <DialogContent className="mx-4 w-[calc(100vw-2rem)] max-w-[425px] sm:mx-0 sm:w-full">
+          <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>Add Expense</DialogTitle>
               <DialogDescription className="sr-only">Form to add a new expense</DialogDescription>
@@ -370,7 +370,7 @@ export function ExpensesDataTable() {
         setOpenEdit(isOpen);
         if (!isOpen) setEditTarget(null);
       }}>
-        <DialogContent className="mx-4 w-[calc(100vw-2rem)] max-w-[425px] sm:mx-0 sm:w-full">
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Edit Expense</DialogTitle>
             <DialogDescription className="sr-only">Form to edit an existing expense</DialogDescription>
@@ -388,7 +388,7 @@ export function ExpensesDataTable() {
           setHistoryVersions([]);
         }
       }}>
-        <DialogContent className="mx-4 w-[calc(100vw-2rem)] max-w-[650px] sm:mx-0 sm:w-full max-h-[80vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[650px]">
           <DialogHeader>
             <DialogTitle>Expense Version History</DialogTitle>
             <DialogDescription>

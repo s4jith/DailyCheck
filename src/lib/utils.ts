@@ -14,17 +14,6 @@ export function formatInr(amount: number): string {
   return inrFormatter.format(amount);
 }
 
-const inrWholeFormatter = new Intl.NumberFormat('en-IN', {
-  style: 'currency',
-  currency: 'INR',
-  maximumFractionDigits: 0,
-});
-
-/** Rupees with the paise dropped — for headline figures and axis labels. */
-export function formatInrWhole(amount: number): string {
-  return inrWholeFormatter.format(amount);
-}
-
 /**
  * Short Indian-numbering form for axis ticks, where space is tight:
  * 1,20,000 -> ₹1.2L, 2,50,00,000 -> ₹2.5Cr.

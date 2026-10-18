@@ -66,7 +66,7 @@ export function StatCard({
       </div>
       <p
         className={cn(
-          'tabular mt-4 font-headline text-[1.75rem] font-bold leading-none tracking-tight sm:text-[2rem]',
+          'tabular mt-4 font-headline text-[1.75rem] font-bold leading-none tracking-tight [overflow-wrap:anywhere] sm:text-[2rem] md:text-2xl 2xl:text-[2rem]',
           styles.value
         )}
       >

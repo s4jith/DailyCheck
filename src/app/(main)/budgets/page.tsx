@@ -61,7 +61,7 @@ export default function BudgetsPage() {
             <EmptyState
               icon={Target}
               title="No budgets yet"
-              description="Pick a category, set a monthly limit, and FinanceFlow will track what is left."
+              description="Pick a category, set a monthly limit, and DailyCheck will track what is left."
               action={<AddBudgetDialog onSubmit={saveBudget} />}
             />
           )}

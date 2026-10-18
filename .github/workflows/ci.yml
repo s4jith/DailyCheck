@@ -15,8 +15,6 @@ jobs:
       # No database connection is made during the build.
       DATABASE_URL: "mongodb://localhost:27017/ci?replicaSet=rs0"
       AUTH_SECRET: "ci-only-secret"
-      AUTH_GOOGLE_ID: "ci"
-      AUTH_GOOGLE_SECRET: "ci"
     steps:
       - name: Checkout
         uses: actions/checkout@v4

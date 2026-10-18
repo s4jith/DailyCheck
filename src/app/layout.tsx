@@ -20,13 +20,13 @@ const grotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: 'FinanceFlow',
+  title: 'DailyCheck',
   description: 'A comprehensive personal finance app for budgeting and expense tracking.',
-  applicationName: 'FinanceFlow',
+  applicationName: 'DailyCheck',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'FinanceFlow',
+    title: 'DailyCheck',
   },
   icons: {
     apple: '/icons/apple-touch-icon.png',

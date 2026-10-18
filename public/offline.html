@@ -3,21 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>FinanceFlow — Offline</title>
+    <title>DailyCheck — Offline</title>
     <style>
+      /* Matches the app's single dark theme (src/app/globals.css). */
       :root {
-        color-scheme: light dark;
-        --bg: #f5f5f5;
-        --fg: #18181b;
-        --muted: #71717a;
-        --primary: #51c878;
-      }
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --bg: #09090b;
-          --fg: #fafafa;
-          --muted: #a1a1aa;
-        }
+        color-scheme: dark;
+        --bg: #0a0a0c;
+        --fg: #fafafa;
+        --muted: #a1a1aa;
+        --primary: #e5484f;
       }
       body {
         margin: 0;
@@ -40,7 +34,7 @@
         padding: 0.6rem 1.4rem;
         font-size: 1rem;
         font-weight: 600;
-        color: #10381f;
+        color: #ffffff;
         background: var(--primary);
         cursor: pointer;
       }
@@ -50,7 +44,7 @@
     <main>
       <img src="/icons/icon-192.png" alt="" />
       <h1>You&rsquo;re offline</h1>
-      <p>FinanceFlow needs a connection to load your data.</p>
+      <p>DailyCheck needs a connection to load your data.</p>
       <button onclick="location.reload()">Try again</button>
     </main>
   </body>

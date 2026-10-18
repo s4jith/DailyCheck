@@ -62,12 +62,12 @@ export function MoveMoneyDialog({ goal, mode, onSubmit }: MoveMoneyDialogProps) 
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {isWithdraw ? (
-          <Button variant="outline" className="flex-1" disabled={goal.savedAmount <= 0}>
-            <Minus className="mr-2 h-4 w-4" /> Withdraw
+          <Button variant="outline" className="px-3" disabled={goal.savedAmount <= 0}>
+            <Minus className="mr-1.5 h-4 w-4" /> Withdraw
           </Button>
         ) : (
-          <Button className="flex-1">
-            <Plus className="mr-2 h-4 w-4" /> Add Money
+          <Button className="px-3">
+            <Plus className="mr-1.5 h-4 w-4" /> Add
           </Button>
         )}
       </DialogTrigger>

@@ -1,9 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
-import { savingsGoalUpdateSchema, firstIssueMessage } from '@/lib/validations';
-
-const OBJECT_ID = /^[0-9a-f]{24}$/i;
+import { OBJECT_ID, savingsGoalUpdateSchema, firstIssueMessage } from '@/lib/validations';
 
 /** Edits a goal and/or moves money in or out of it (`contribute`). */
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {

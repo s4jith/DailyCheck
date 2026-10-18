@@ -7,13 +7,13 @@ import { StatCard } from '@/components/dashboard/StatCard';
 import { RecentExpensesCard } from '@/components/dashboard/RecentExpensesCard';
 import { BudgetsCard } from '@/components/dashboard/BudgetsCard';
 import { SpendingTrendChart } from '@/components/charts/SpendingTrendChart';
-import { ArrowDownRight, PiggyBank, Wallet } from 'lucide-react';
-import { TotalAmountDialog } from '@/components/dashboard/TotalAmountDialog';
+import Link from 'next/link';
+import { ArrowDownRight, ArrowUpRight, Landmark, Wallet } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useExpenses } from '@/hooks/use-expenses';
 import { useBudgets } from '@/hooks/use-budgets';
-import { useProfile } from '@/hooks/use-profile';
-import { useToast } from '@/hooks/use-toast';
-import { api } from '@/lib/api';
+import { useAccounts } from '@/hooks/use-accounts';
+import { useInflow } from '@/hooks/use-inflow';
 import { currentMonthRange } from '@/lib/dates';
 import { formatInr } from '@/lib/utils';
 
@@ -21,33 +21,10 @@ export default function DashboardPage() {
   const monthRange = React.useMemo(() => currentMonthRange(), []);
   const { expenses, loading: expensesLoading } = useExpenses(monthRange);
   const { budgets, loading: budgetsLoading } = useBudgets();
-  const { profile, refresh: refreshProfile } = useProfile();
-  const { toast } = useToast();
+  const { accounts, total: totalAmount } = useAccounts();
+  const { total: moneyIn } = useInflow(monthRange);
 
-  const handleSetAmount = async ({ totalAmount }: { totalAmount: number }) => {
-    try {
-      await api('/api/profile', {
-        method: 'PATCH',
-        body: JSON.stringify({ monthlyIncome: totalAmount }),
-      });
-      await refreshProfile();
-      toast({ title: 'Success', description: 'Total amount updated.' });
-      return true;
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to update total amount.',
-      });
-      return false;
-    }
-  };
-
-  const totalAmount = profile?.monthlyIncome ?? 0;
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
-  const savings = totalAmount - totalExpenses;
-
-  const spentShare = totalAmount > 0 ? Math.round((totalExpenses / totalAmount) * 100) : null;
 
   return (
     <div className="animate-rise">
@@ -55,7 +32,11 @@ export default function DashboardPage() {
         title="Dashboard"
         description={`Your money at a glance — ${format(monthRange.from, 'MMMM yyyy')}`}
       >
-        <TotalAmountDialog onSubmit={handleSetAmount} currentAmount={totalAmount} />
+        <Button variant="outline" asChild>
+          <Link href="/accounts">
+            <Landmark className="mr-2 h-4 w-4" /> Manage Accounts
+          </Link>
+        </Button>
       </PageHeader>
 
       <div className="grid gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -64,26 +45,24 @@ export default function DashboardPage() {
           title="Total Expenses"
           value={formatInr(totalExpenses)}
           icon={ArrowDownRight}
-          description={
-            spentShare === null
-              ? `${expenses.length} transaction${expenses.length === 1 ? '' : 's'} this month`
-              : `${spentShare}% of your total amount`
-          }
+          description={`${expenses.length} transaction${expenses.length === 1 ? '' : 's'} this month`}
         />
         <StatCard
           title="Total Amount"
           value={formatInr(totalAmount)}
           icon={Wallet}
-          description="What you have to work with this month"
+          description={
+            accounts.length === 0
+              ? 'Add your bank accounts to see your total'
+              : `Across ${accounts.length} bank account${accounts.length === 1 ? '' : 's'}`
+          }
         />
         <StatCard
-          title="Net Savings"
-          value={formatInr(savings)}
-          icon={PiggyBank}
-          tone={savings < 0 ? 'warning' : 'success'}
-          description={
-            savings < 0 ? 'You are over your total amount' : 'Left after this month’s spending'
-          }
+          title="Money In"
+          value={formatInr(moneyIn)}
+          icon={ArrowUpRight}
+          tone="success"
+          description="Added to your accounts this month"
         />
       </div>
 

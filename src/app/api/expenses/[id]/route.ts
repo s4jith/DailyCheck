@@ -1,9 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
-import { expenseSchema, firstIssueMessage } from '@/lib/validations';
-
-const OBJECT_ID = /^[0-9a-f]{24}$/i;
+import { accountErrorResponse, chargeExpense, refundExpense } from '@/lib/accounts';
+import { OBJECT_ID, expenseSchema, firstIssueMessage } from '@/lib/validations';
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -31,24 +30,43 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: 'Expense not found.' }, { status: 404 });
   }
 
-  // Create a record of the current state before updating
-  await prisma.expenseVersion.create({
-    data: {
-      expenseId: existing.id,
-      description: existing.description,
-      amount: existing.amount,
-      category: existing.category,
-      date: existing.date,
-    },
-  });
+  // Omitting accountId keeps the expense on its current account.
+  const accountId =
+    parsed.data.accountId === undefined ? existing.accountId : parsed.data.accountId;
 
-  // Update the expense
-  const updated = await prisma.expense.update({
-    where: { id },
-    data: parsed.data,
-  });
+  try {
+    const updated = await prisma.$transaction(async (tx) => {
+      // Create a record of the current state before updating
+      await tx.expenseVersion.create({
+        data: {
+          expenseId: existing.id,
+          description: existing.description,
+          amount: existing.amount,
+          category: existing.category,
+          date: existing.date,
+          accountId: existing.accountId,
+        },
+      });
 
-  return NextResponse.json(updated);
+      const next = await tx.expense.update({
+        where: { id },
+        data: { ...parsed.data, accountId },
+      });
+
+      // Undo the old charge, then charge the new amount (possibly to a different account).
+      await refundExpense(tx, existing);
+      await chargeExpense(tx, next, {
+        // An expense already on an archived account can still be edited.
+        allowArchived: next.accountId === existing.accountId,
+      });
+
+      return next;
+    });
+
+    return NextResponse.json(updated);
+  } catch (error) {
+    return accountErrorResponse(error);
+  }
 }
 
 export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -62,14 +80,19 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     return NextResponse.json({ error: 'Expense not found.' }, { status: 404 });
   }
 
-  // Scoping the delete by userId enforces ownership server-side.
-  const result = await prisma.expense.deleteMany({
+  const existing = await prisma.expense.findFirst({
     where: { id, userId: session.user.id },
   });
 
-  if (result.count === 0) {
+  if (!existing) {
     return NextResponse.json({ error: 'Expense not found.' }, { status: 404 });
   }
+
+  // Deleting an expense puts its money back on the account it was paid from.
+  await prisma.$transaction(async (tx) => {
+    await refundExpense(tx, existing);
+    await tx.expense.delete({ where: { id } });
+  });
 
   return new NextResponse(null, { status: 204 });
 }

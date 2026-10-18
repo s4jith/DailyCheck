@@ -37,6 +37,12 @@ Thumbs.db
 # IDEs
 /.vscode
 /docs
+# Android app (mobile/): never commit the signing key or its passwords
+/mobile/node_modules
+*.jks
+*.keystore
+/mobile/keystore.properties
+
 # Deployment
 .vercel
 

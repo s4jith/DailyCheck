@@ -8,7 +8,6 @@ const PROFILE_SELECT = {
   name: true,
   email: true,
   image: true,
-  monthlyIncome: true,
 } as const;
 
 export async function GET() {
