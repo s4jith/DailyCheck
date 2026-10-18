@@ -4,7 +4,7 @@
   "webDir": "www",
   "backgroundColor": "#0A0A0C",
   "server": {
-    "url": "https://REPLACE-WITH-YOUR-VERCEL-URL",
+    "url": "https://daily-check-red.vercel.app",
     "errorPath": "offline.html"
   },
   "android": {
