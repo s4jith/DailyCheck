@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">DailyCheck</string>
+    <string name="title_activity_main">DailyCheck</string>
+    <string name="package_name">com.s4jith.dailycheck</string>
+    <string name="custom_url_scheme">com.s4jith.dailycheck</string>
+</resources>

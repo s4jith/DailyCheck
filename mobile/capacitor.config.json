@@ -1,0 +1,13 @@
+{
+  "appId": "com.s4jith.dailycheck",
+  "appName": "DailyCheck",
+  "webDir": "www",
+  "backgroundColor": "#0A0A0C",
+  "server": {
+    "url": "https://REPLACE-WITH-YOUR-VERCEL-URL",
+    "errorPath": "offline.html"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}

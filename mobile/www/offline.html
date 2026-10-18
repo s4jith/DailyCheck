@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DailyCheck — Offline</title>
+    <style>
+      /* Matches the app's single dark theme (src/app/globals.css). */
+      :root {
+        color-scheme: dark;
+        --bg: #0a0a0c;
+        --fg: #fafafa;
+        --muted: #a1a1aa;
+        --primary: #e5484f;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        text-align: center;
+      }
+      main { padding: 2rem; }
+      img { width: 72px; height: 72px; border-radius: 18px; }
+      h1 { margin: 1rem 0 0.25rem; font-size: 1.5rem; }
+      p { margin: 0 0 1.5rem; color: var(--muted); }
+      button {
+        border: 0;
+        border-radius: 0.5rem;
+        padding: 0.6rem 1.4rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #ffffff;
+        background: var(--primary);
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img src="icons/icon-192.png" alt="" />
+      <h1>You&rsquo;re offline</h1>
+      <p>DailyCheck needs a connection to load your data.</p>
+      <!-- set-url.mjs fills in the hosted app address -->
+      <button onclick="location.href = 'https://REPLACE-WITH-YOUR-VERCEL-URL'">Try again</button>
+    </main>
+  </body>
+</html>
